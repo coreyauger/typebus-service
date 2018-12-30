@@ -1,0 +1,41 @@
+<configuration>
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="stdout"/>
+    </root>
+
+    <logger name="com.amazonaws" level="INFO"/>
+    <logger name="logback.debug" level="WARN"/>
+
+    <logger name="org.apache.curator" level="INFO"/>
+    <logger name="org.apache.zookeeper" level="ERROR"/>
+    <logger name="org.apache.zookeeper.ZooKeeper" level="WARN"/>
+
+    <logger name="org.apache.http" level="INFO"/>
+    <logger name="org.apache.http.wire" level="WARN"/>
+    <logger name="org.apache.http.client.protocol" level="ERROR"/>
+
+    <logger name="org.apache.kafka.clients.consumer." level="WARN" />
+    <logger name="sun.net.www" level="WARN"/>
+    <logger name="scala.slick" level="INFO"/>
+    <logger name="scala.slick.ast" level="WARN"/>
+    <logger name="scala.slick.compiler" level="WARN"/>
+    <logger name="scala.slick.relational.ResultConverterCompiler" level="WARN"/>
+    <logger name="slick.ast" level="WARN"/>
+    <logger name="slick.compiler" level="WARN"/>
+    <logger name="slick.relational.ResultConverterCompiler" level="WARN"/>
+
+
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="org.apache.kafka.common.metrics" level="WARN"/>
+
+</configuration>

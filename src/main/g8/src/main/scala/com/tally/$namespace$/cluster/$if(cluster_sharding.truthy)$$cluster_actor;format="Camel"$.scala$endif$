@@ -1,0 +1,107 @@
+package $organization$.$namespace$.cluster
+
+import java.util.UUID
+
+import scala.concurrent.duration._
+import akka.actor.{ActorLogging, ActorRef, PoisonPill, Props, ReceiveTimeout, Terminated}
+import akka.cluster.Cluster
+import akka.cluster.sharding.ShardRegion
+import akka.persistence.{PersistentActor, SnapshotOffer}
+import io.surfkit.typebus.event.{PublishedEvent, SocketEvent}
+
+import scala.concurrent.Future
+
+object $cluster_actor;format="Camel"$ extends io.surfkit.typebus.cluster.Actor.ActorSharding{
+  def props(bus: ActorRef): Props = Props(classOf[$cluster_actor;format="Camel"$], bus)
+  val idExtractor: ShardRegion.ExtractEntityId = {
+    case cmd: Command => (cmd.uuid.toString, cmd)
+  }
+  val shardResolver: ShardRegion.ExtractShardId = {
+    case cmd: Command => (math.abs(cmd.uuid.toString.hashCode) % numberOfShards).toString
+  }
+}
+
+
+class $cluster_actor;format="Camel"$(bus: ActorRef) extends PersistentActor with ActorLogging with Serializable {
+  implicit val system = context.system
+  import system.dispatcher
+  import ShardRegion.Passivate
+  import io.surfkit.typebus.cluster.Actor.RichPartial
+
+  var queue = new scala.collection.mutable.Queue[$cluster_actor;format="Camel"$.ShardMessage]()
+  lazy val cluster = Cluster(context.system)
+
+  override def persistenceId: String = "$cluster_actor;format="Camel"$"
+  def clusterPath = cluster.selfAddress + self.path.toStringWithoutAddress
+
+  // PersistentActor
+  override def receiveCommand: Receive = initial
+  override def receiveRecover: Receive = {
+    case SnapshotOffer(_, snapshot: Any) => // TODO:
+    //case event: SomeType => // TODO:
+    case _ =>
+  }
+
+  // actor should passivate after 20 min of no messages
+  // https://doc.akka.io/docs/akka/2.5/java/cluster-sharding.html#passivation
+  context.setReceiveTimeout(20 minutes)
+
+  def bootstrap(uid: UUID) = {
+    for {
+      _ <- Future.successful(Unit)  // TODO: restore the state of the world since last ...
+    } yield {
+      // TODO: set the state...
+      context.become(active)
+      queue.dequeueAll(_ => true).foreach(self ! _)
+      queue.clear()
+      Unit
+    }
+  }
+
+
+  def initial: Receive = {
+    case a @ $cluster_actor;format="Camel"$.ShardMessage(uid, _) =>
+      queue.enqueue(a)    // queue up message for when we become active and can handle it...
+      context.become(gated)
+      bootstrap(uid).recover{
+        case t: Throwable =>
+          t.printStackTrace()
+          queue.clear()
+          context.become(initial)
+      }
+  }
+
+  def gated: Receive = {
+    case a:$cluster_actor;format="Camel"$.ShardMessage =>
+      queue.enqueue(a)    // queue up message for when we become active and can handle it...
+    case a =>
+      log.warning(s"Unknown message type while actor gated " + a) // ignore..
+  }
+
+  def extractMessage(any: Any): Any = any match {
+    case $cluster_actor;format="Camel"$.ShardMessage(_, msg) => msg
+    case _ => any
+  }
+
+  def active: Receive = process composePartial extractMessage
+
+  def process: Receive = {
+    // tell parent actor to send us a poisinpill
+    // https://github.com/boldradius/akka-dddd-template/blob/master/src/main/scala/com/boldradius/cqrs/Passivation.scala
+    case ReceiveTimeout =>
+      context.parent ! Passivate(stopMessage = PoisonPill)
+    case PoisonPill => context.stop(self)
+    case Terminated(source) => Unit // shutdown logic
+
+    case x: PublishedEvent =>
+      x.meta.responseTo match{
+        case Some(eventId) =>
+          // TODO: some kind of return logic
+        case None =>
+          bus ! x.copy(meta = x.meta.copy(source = clusterPath) )
+      }
+    case x =>
+      log.warning(s"handling unknown type: " + x.getClass.getName)
+  }
+
+}

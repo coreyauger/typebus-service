@@ -1,0 +1,57 @@
+package $organization$.$namespace$.router
+
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.util.UUID
+
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
+import akka.http.scaladsl.server.{AuthorizationFailedRejection, Directive1, Route}
+import org.squbs.unicomplex.RouteDefinition
+import akka.actor._
+import akka.util.{ByteString, Timeout}
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.ws._
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
+import akka.stream.OverflowStrategy
+import akka.stream.scaladsl._
+import com.typesafe.config.ConfigFactory
+import java.nio.file._
+
+import headers._
+import HttpMethods._
+import com.sksamuel.avro4s._
+import io.surfkit.typebus.event._
+
+object ActorPaths {
+  // actor path = /user/ + cube-shortname + / + actor name
+  val Path = "/user/$name;format="normalize"$/$name;format="Camel"$"
+}
+
+class Router extends RouteDefinition {
+  implicit val system = context.system
+
+  import system.dispatcher
+  val config = ConfigFactory.load()
+
+  val decider: Supervision.Decider = {
+    case _ => Supervision.Resume  // Never give up !
+  }
+
+  implicit val materializer = ActorMaterializer(ActorMaterializerSettings(system).withSupervisionStrategy(decider))
+
+  implicit val timeout = Timeout(10 seconds)
+
+  def route: Route =
+      get {
+        pathSingleSlash {
+          getFromDirectory(s"/index.html")
+        }
+      } ~
+      path("bundle.js") {
+        get {
+          getFromDirectory(s"/bundle.js")
+        }
+      }
+
+}
+
