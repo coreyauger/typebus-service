@@ -1,7 +1,6 @@
 package $organization$.$namespace$
 
 import io.surfkit.typebus._
-import io.surfkit.typebus.Implicits._
 
 package object data {
 
