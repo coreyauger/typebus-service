@@ -1,7 +1,6 @@
 package $organization$.$namespace$
 
 import io.surfkit.typebus._
-import io.surfkit.typebus.Implicits._
 
 package object data {
 
@@ -21,18 +20,12 @@ package object data {
 
 
   object Implicits extends AvroByteStreams{
-    implicit val GetLibraryReader = new AvroByteStreamReader[GetLibrary]
-    implicit val GetLibraryWriter = new AvroByteStreamWriter[GetLibrary]
-    implicit val LibraryReader = new AvroByteStreamReader[Library]
-    implicit val LibraryWriter = new AvroByteStreamWriter[Library]
-    implicit val OrderBookReader = new AvroByteStreamReader[OrderBook]
-    implicit val OrderBookWriter = new AvroByteStreamWriter[OrderBook]
-    implicit val RecieptReader = new AvroByteStreamReader[Receipt]
-    implicit val RecieptWriter = new AvroByteStreamWriter[Receipt]
-    implicit val GetStatsReader = new AvroByteStreamReader[GetStats]
-    implicit val GetStatsWriter = new AvroByteStreamWriter[GetStats]
-    implicit val StatsReader = new AvroByteStreamReader[Stats]
-    implicit val StatsWriter = new AvroByteStreamWriter[Stats]
+    implicit val getLibraryRW = Typebus.declareType[GetLibrary, AvroByteStreamReader[GetLibrary], AvroByteStreamWriter[GetLibrary]]
+    implicit val libraryRW = Typebus.declareType[Library, AvroByteStreamReader[Library], AvroByteStreamWriter[Library]]
+    implicit val orderBookRW = Typebus.declareType[OrderBook, AvroByteStreamReader[OrderBook], AvroByteStreamWriter[OrderBook]]
+    implicit val receiptRW = Typebus.declareType[Receipt, AvroByteStreamReader[Receipt], AvroByteStreamWriter[Receipt]]
+    implicit val getStatsRW = Typebus.declareType[GetStats, AvroByteStreamReader[GetStats], AvroByteStreamWriter[GetStats]]
+    implicit val statsRW = Typebus.declareType[Stats, AvroByteStreamReader[Stats], AvroByteStreamWriter[Stats]]
   }
 
   // exmaple database of foods.

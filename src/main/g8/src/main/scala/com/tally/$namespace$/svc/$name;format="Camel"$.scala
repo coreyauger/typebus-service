@@ -81,6 +81,9 @@ class $name;format="Camel"$ extends Service[BaseType]("$name;format="normalize"$
   log.info("Finished registering streams, trying to start service.")
   startTypeBus
 
+  override def receive = {
+    case _ =>
+  }
 
 }
 
