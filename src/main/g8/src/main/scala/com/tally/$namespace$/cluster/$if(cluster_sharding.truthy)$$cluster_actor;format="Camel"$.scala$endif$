@@ -33,7 +33,7 @@ class $cluster_actor;format="Camel"$(bus: ActorRef) extends PersistentActor with
 
   // self.path.name is the entity identifier (utf-8 URL-encoded)
   // https://doc.akka.io/docs/akka/2.5/cluster-sharding.html#an-example
-  override def persistenceId: String = "$cluster_actor;format="Camel"$-${self.path.name}"
+  override def persistenceId: String = "$cluster_actor;format="Camel"$-\${self.path.name}"
   def clusterPath = cluster.selfAddress + self.path.toStringWithoutAddress
 
   // PersistentActor
