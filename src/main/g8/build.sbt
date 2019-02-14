@@ -20,7 +20,7 @@ val squbsV = "0.11.0"
 libraryDependencies ++= Seq(
   "org.squbs" %% "squbs-unicomplex" % squbsV,
   "com.sksamuel.avro4s" %% "avro4s-core" % "2.0.2",
-  "io.surfkit" %% "typebus-squbs" % "0.0.1-SNAPSHOT",
+  "io.surfkit" %% "typebus-squbs" % "0.0.5-SNAPSHOT",
   $if(cluster_sharding.truthy)$
   "com.typesafe.akka" %% "akka-cluster-sharding" % akkaV,
   $endif$
