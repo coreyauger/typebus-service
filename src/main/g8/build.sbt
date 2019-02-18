@@ -36,4 +36,8 @@ enablePlugins(PackPlugin)
 
 packMain := Map("$name;format="normalize"$" -> "org.squbs.unicomplex.Bootstrap")
 
+val paradiseVersion = "2.1.1"
+
+addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
+
 

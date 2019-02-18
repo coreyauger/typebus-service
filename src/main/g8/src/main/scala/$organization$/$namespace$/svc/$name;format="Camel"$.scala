@@ -10,6 +10,7 @@ $if(cluster_sharding.truthy)$
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import $organization$.$namespace$.cluster.$cluster_actor;format="Camel"$
 $endif$
+import io.surfkit.typebus.annotations.ServiceMethod
 
 import $organization$.$namespace$.data._
 
@@ -45,6 +46,7 @@ class $name;format="Camel"$ extends Service[BaseType]("$name;format="normalize"$
     * @param meta event meta contains details about the event to help with more advanced routing
     * @return A new type that will be broadcast onto the bus
     */
+  @ServiceMethod
   def getLibrary(getLibrary: GetLibrary, meta: EventMeta): Future[Library] = {
     numRequests = numRequests + 1
     Future.successful(Library(library))    // could be some database call
@@ -55,7 +57,8 @@ class $name;format="Camel"$ extends Service[BaseType]("$name;format="normalize"$
     * @param order contains the food items that we wish to order
     * @return a receipt
     */
-  def processOrder(order: OrderBook): Future[Receipt] = {
+  @ServiceMethod
+  def processOrder(order: OrderBook, meta: EventMeta): Future[Receipt] = {
     numRequests = numRequests + 1
     val total = order.book.map(_.price).sum
     totalSales = totalSales + total
@@ -69,14 +72,11 @@ class $name;format="Camel"$ extends Service[BaseType]("$name;format="normalize"$
     * @param getStats request to get stats on sales
     * @return Unit
     */
+  @ServiceMethod
   def getStatus(getStats: GetStats, meta: EventMeta): Future[Unit] = {
     replyToSender(meta, Stats(numRequests, if(getStats.withTotalSaves) Some(totalSales) else None ))
     Future.successful(Unit)
   }
-
-  registerStream(getLibrary _)
-  registerStream(processOrder _)
-  registerStream(getStatus _)
 
   log.info("Finished registering streams, trying to start service.")
   startTypeBus
