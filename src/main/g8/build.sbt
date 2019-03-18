@@ -32,12 +32,17 @@ libraryDependencies ++= Seq(
 
 mainClass in (Compile, run) := Some("org.squbs.unicomplex.Bootstrap")
 
-enablePlugins(PackPlugin)
-
-packMain := Map("$name;format="normalize"$" -> "org.squbs.unicomplex.Bootstrap")
-
 val paradiseVersion = "2.1.1"
 
 addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
+
+scalacOptions += "-Yrangepos"
+
+dockerBaseImage := "adoptopenjdk/openjdk8"
+
+// CA - can not generate docker image without this line.
+packageName in Docker := name.value
+version in Docker := "latest"
+dockerRepository := Some("registry.pro-us-east-1.openshift.com/sherpa-akka")
 
 

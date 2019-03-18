@@ -28,7 +28,6 @@ class $cluster_actor;format="Camel"$(bus: ActorRef) extends PersistentActor with
   import ShardRegion.Passivate
   import io.surfkit.typebus.cluster.Actor.RichPartial
 
-  var queue = new scala.collection.mutable.Queue[$cluster_actor;format="Camel"$.ShardMessage]()
   lazy val cluster = Cluster(context.system)
 
   // self.path.name is the entity identifier (utf-8 URL-encoded)
@@ -37,7 +36,7 @@ class $cluster_actor;format="Camel"$(bus: ActorRef) extends PersistentActor with
   def clusterPath = cluster.selfAddress + self.path.toStringWithoutAddress
 
   // PersistentActor
-  override def receiveCommand: Receive = initial
+  override def receiveCommand: Receive = active
   override def receiveRecover: Receive = {
     case SnapshotOffer(_, snapshot: Any) => // TODO:
     //case event: SomeType => // TODO:
@@ -48,37 +47,6 @@ class $cluster_actor;format="Camel"$(bus: ActorRef) extends PersistentActor with
   // https://doc.akka.io/docs/akka/2.5/java/cluster-sharding.html#passivation
   context.setReceiveTimeout(20 minutes)
 
-  def bootstrap(uid: UUID) = {
-    for {
-      _ <- Future.successful(Unit)  // TODO: restore the state of the world since last ...
-    } yield {
-      // TODO: set the state...
-      context.become(active)
-      queue.dequeueAll(_ => true).foreach(self ! _)
-      queue.clear()
-      Unit
-    }
-  }
-
-
-  def initial: Receive = {
-    case a @ $cluster_actor;format="Camel"$.ShardMessage(uid, _) =>
-      queue.enqueue(a)    // queue up message for when we become active and can handle it...
-      context.become(gated)
-      bootstrap(uid).recover{
-        case t: Throwable =>
-          t.printStackTrace()
-          queue.clear()
-          context.become(initial)
-      }
-  }
-
-  def gated: Receive = {
-    case a:$cluster_actor;format="Camel"$.ShardMessage =>
-      queue.enqueue(a)    // queue up message for when we become active and can handle it...
-    case a =>
-      log.warning(s"Unknown message type while actor gated " + a) // ignore..
-  }
 
   def extractMessage(any: Any): Any = any match {
     case $cluster_actor;format="Camel"$.ShardMessage(_, msg) => msg

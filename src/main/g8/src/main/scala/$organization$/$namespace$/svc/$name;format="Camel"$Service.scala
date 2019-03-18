@@ -2,28 +2,29 @@ package $organization$.$namespace$.svc
 
 import akka.actor._
 import io.surfkit.typebus._
-import io.surfkit.typebus.event.EventMeta
+import io.surfkit.typebus
+import io.surfkit.typebus.event.{EventMeta, ServiceIdentifier}
 import io.surfkit.typebus.module.Service
 import scala.concurrent.ExecutionContext.Implicits.global
-import io.surfkit.typebus.bus.$bus_type;format="lower"$.$bus_type;format="cap"$Bus
 $if(cluster_sharding.truthy)$
 import akka.cluster.sharding.{ClusterSharding, ClusterShardingSettings}
 import $organization$.$namespace$.cluster.$cluster_actor;format="Camel"$
 $endif$
+import scala.concurrent.Future
 import io.surfkit.typebus.annotations.ServiceMethod
-
+import io.surfkit.typebus.bus.{Publisher, RetryBackoff}
+import scala.concurrent.duration._
 import $organization$.$namespace$.data._
 
 import scala.concurrent.Future
 
-class $name;format="Camel"$ extends Service[BaseType]("$name;format="normalize"$") with Actor with ActorLogging with $bus_type;format="cap"$Bus[BaseType] with AvroByteStreams{
-  implicit val system = context.system
-  import context.dispatcher
+class $name;format="Camel"$Service(serviceIdentifier: ServiceIdentifier, publisher: Publisher, sys: ActorSystem) extends Service(serviceIdentifier,publisher) with AvroByteStreams{
+  implicit val system = sys
 
-  log.info("Starting service: " + serviceName)
+  system.log.info("Starting service: " + serviceIdentifier.name)
 
+  val bus = publisher.busActor
   $if(cluster_sharding.truthy)$
-  val bus = busActor
   val $cluster_actor;format="camel"$Region = ClusterSharding(system).start(
     typeName = "$cluster_actor;format="Camel"$",
     entityProps = $cluster_actor;format="Camel"$.props(bus),
@@ -51,6 +52,10 @@ class $name;format="Camel"$ extends Service[BaseType]("$name;format="normalize"$
     numRequests = numRequests + 1
     Future.successful(Library(library))    // could be some database call
   }
+  registerStream(getLibrary _)
+    .withRetryPolicy{
+    case _ => typebus.bus.RetryPolicy(3, 1 second, RetryBackoff.Exponential)
+  }
 
   /***
     * This is an example that does not need the meta
@@ -58,32 +63,18 @@ class $name;format="Camel"$ extends Service[BaseType]("$name;format="normalize"$
     * @return a receipt
     */
   @ServiceMethod
-  def processOrder(order: OrderBook, meta: EventMeta): Future[Receipt] = {
+  def orderBook(order: OrderBook, meta: EventMeta): Future[BookOrdered] = {
     numRequests = numRequests + 1
-    val total = order.book.map(_.price).sum
+    val total = library.find(_.id == order.book).map(_.price).getOrElse(0.0)
     totalSales = totalSales + total
-    val receipt = Future.successful(Receipt(total, total * 0.05) ) // perhaps some db update
-    receipt
+    val bookOrdered = Future.successful(BookOrdered(book = order.book, Receipt(total, total * 0.05)) ) // perhaps some db update
+    bookOrdered
   }
+  registerStream(orderBook _)
+    .withPartitionKey(_.book.toString)
 
-  /***
-    * This is a sync.  It will not show up as a method call in your service definition.  You can use this kind
-    * of call to route to cluster actors or perform operations that don't return a value.
-    * @param getStats request to get stats on sales
-    * @return Unit
-    */
-  @ServiceMethod
-  def getStatus(getStats: GetStats, meta: EventMeta): Future[Unit] = {
-    replyToSender(meta, Stats(numRequests, if(getStats.withTotalSaves) Some(totalSales) else None ))
-    Future.successful(Unit)
-  }
 
-  log.info("Finished registering streams, trying to start service.")
-  startTypeBus
-
-  override def receive = {
-    case _ =>
-  }
+  system.log.info("Finished registering streams, trying to start service.")
 
 }
 
