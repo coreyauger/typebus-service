@@ -32,6 +32,6 @@ class $entity;format="Camel"$Entity extends PersistentEntity {
 }
 
 class $entity;format="Camel"$EntityDatabase(persistentEntityRegistry: PersistentEntityRegistry) extends $entity;format="Camel"$Database{
-  def createUser(x: CreateUserCommand): Future[User] = persistentEntityRegistry.refFor[UserEntity](x.user.id.toString).ask(x)
-  def getUser(x: GetUserCommand): Future[User] = persistentEntityRegistry.refFor[UserEntity](x.id.toString).ask(x)
+  def createUser(x: CreateUserCommand): Future[User] = persistentEntityRegistry.refFor[$entity;format="Camel"$Entity](x.user.id.toString).ask(x)
+  def getUser(x: GetUserCommand): Future[User] = persistentEntityRegistry.refFor[$entity;format="Camel"$Entity](x.id.toString).ask(x)
 }
