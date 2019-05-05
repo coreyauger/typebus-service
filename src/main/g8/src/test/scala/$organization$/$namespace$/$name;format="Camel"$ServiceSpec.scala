@@ -8,11 +8,12 @@ import $organization$.$namespace$.data.{CreateUserCommand, GetUserCommand, User,
 import io.surfkit.typebus.bus.TypebusApplication
 import io.surfkit.typebus.bus.testkit._
 import io.surfkit.typebus.client.Client
-import io.surfkit.typebus.event.{EventMeta, PublishedEvent, ServiceIdentifier}
+import io.surfkit.typebus.event.{EventMeta, PublishedEvent, ServiceIdentifier, ServiceException}
 import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, Matchers}
 
 import scala.concurrent.duration._
 import scala.concurrent.Future
+import scala.util.Either
 
 class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
   import $organization$.$namespace$.data.Implicits._
@@ -58,8 +59,8 @@ class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with 
   )
 
   class $name;format="Camel"$Client extends Client(serviceIdentity, producer, system){
-    def createUser(x: CreateUserCommand): Future[User] = wire[CreateUserCommand, User](x)
-    def getUser(x: GetUserCommand): Future[User] = wire[GetUserCommand, User](x)
+    def createUser(x: CreateUserCommand): Future[Either[ServiceException, User]] = wire[CreateUserCommand, User](x)
+    def getUser(x: GetUserCommand): Future[Either[ServiceException, User]] = wire[GetUserCommand, User](x)
   }
 
   val client = new $name;format="Camel"$Client
@@ -75,7 +76,7 @@ class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with 
     "create a user" in {
       for{
         u <-client.createUser(CreateUserCommand(testUser))
-      }yield assert( u == testUser )
+      }yield assert( u == Right(testUser) )
     }
 
   }

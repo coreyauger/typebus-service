@@ -15,10 +15,12 @@ lazy val `$name;format="normalize"$` =
 
 val akkaV = "2.5.13"
 
+val typebusV =  "0.0.6-SNAPSHOT"
+
 libraryDependencies ++= Seq(
   "com.sksamuel.avro4s" %% "avro4s-core" % "2.0.2",
   "com.typesafe.akka" %% "akka-cluster-sharding" % akkaV,
-  "io.surfkit" %% "typebus-kafka" % "0.0.5-SNAPSHOT",
+  "io.surfkit" %% "typebus-kafka" % typebusV,
   "com.typesafe.akka" %% "akka-persistence-cassandra" % "0.91",
   "com.datastax.cassandra" % "cassandra-driver-core" % "3.6.0",
   "com.softwaremill.macwire" %% "macros" % "2.3.0" % "provided",
@@ -28,7 +30,7 @@ libraryDependencies ++= Seq(
 
   "org.scalatest" %% "scalatest" % "3.0.4" % Test,
   "com.lightbend.lagom" %% "lagom-scaladsl-testkit" % "1.5.0-RC2" % Test,
-  "io.surfkit" %% "typebus-testkit" % "0.0.5-SNAPSHOT" % Test
+  "io.surfkit" %% "typebus-testkit" % typebusV % Test
 )
 
 val paradiseVersion = "2.1.1"

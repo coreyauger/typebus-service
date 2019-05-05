@@ -46,19 +46,5 @@ class $entity;format="Camel"$EntitySpec extends WordSpec with Matchers with Befo
       assert( user == someUser )
     }
 
-  /*
-    "fail to create another user when one exists" in {
-      val outcome = driver.run(CreateUserCommand(User(UUID.randomUUID(), "Should not work")))
-      driver.getAllIssues should have size 1
-      assert(outcome.replies.head.isInstanceOf[InvalidCommandException])
-    }
-
-    "fail to get a user that does not exist" in {
-      val driver = new PersistentEntityTestDriver(system, new UserEntity, "test@test.com")
-      val outcome = notFoundDrive.run(GetUserCommand(userNotFound))
-      driver.getAllIssues should have size 1
-      assert(outcome.replies.head.isInstanceOf[InvalidCommandException])
-    }
-    */
   }
 }
