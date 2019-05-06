@@ -16,6 +16,8 @@ import scala.concurrent.Future
 import scala.util.Either
 
 class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
+
+  /*
   import $organization$.$namespace$.data.Implicits._
   implicit val system = ActorSystem("$name;format="normalize"$")
   implicit val actorMaterializer = ActorMaterializer(ActorMaterializerSettings(system))
@@ -80,4 +82,5 @@ class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with 
     }
 
   }
+  */
 }

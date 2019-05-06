@@ -30,7 +30,7 @@ class $entity;format="Camel"$EntitySpec extends WordSpec with Matchers with Befo
     id = userId,
     name = "Some Name"
   )
-
+/*
   "user entity" should {
 
     "create a user" in  {
@@ -47,4 +47,5 @@ class $entity;format="Camel"$EntitySpec extends WordSpec with Matchers with Befo
     }
 
   }
+  */
 }
