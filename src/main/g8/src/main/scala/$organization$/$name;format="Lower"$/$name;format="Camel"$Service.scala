@@ -1,8 +1,8 @@
-package $organization$.$namespace$
+package $organization$.$name;format="Lower"$
 
 import akka.actor._
 import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
-import $organization$.$namespace$.data._
+import $organization$.$name;format="Lower"$.data._
 import io.surfkit.typebus
 import io.surfkit.typebus._
 import io.surfkit.typebus.annotations.ServiceMethod
@@ -18,7 +18,7 @@ class $name;format="Camel"$Service(serviceIdentifier: ServiceIdentifier, publish
 
   system.log.info("Starting service: " + serviceIdentifier.name)
   val bus = publisher.busActor
-  import $organization$.$namespace$.data.Implicits._
+  import $organization$.$name;format="Lower"$.data.Implicits._
 
   @ServiceMethod
   def createUser(createUser: CreateUserCommand, meta: EventMeta): Future[User] = userDb.createUser(createUser)

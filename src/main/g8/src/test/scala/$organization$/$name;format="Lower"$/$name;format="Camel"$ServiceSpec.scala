@@ -1,10 +1,10 @@
-package $organization$.$namespace$
+package $organization$.$name;format="lower"$
 
 import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
-import $organization$.$namespace$.data.{CreateUserCommand, GetUserCommand, User, UserDatabase}
+import $organization$.$name;format="Lower"$.data.{CreateUserCommand, GetUserCommand, User, UserDatabase}
 import io.surfkit.typebus.bus.TypebusApplication
 import io.surfkit.typebus.bus.testkit._
 import io.surfkit.typebus.client.Client
@@ -18,7 +18,7 @@ import scala.util.Either
 class $name;format="Camel"$ServiceSpec extends AsyncWordSpec with Matchers with BeforeAndAfterAll {
 
   /*
-  import $organization$.$namespace$.data.Implicits._
+  import $organization$.$name;format="Lower"$.data.Implicits._
   implicit val system = ActorSystem("$name;format="normalize"$")
   implicit val actorMaterializer = ActorMaterializer(ActorMaterializerSettings(system))
   val userDb = new UserDatabase{

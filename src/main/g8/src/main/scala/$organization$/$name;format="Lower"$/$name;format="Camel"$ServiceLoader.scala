@@ -1,4 +1,4 @@
-package $organization$.$namespace$
+package $organization$.$name;format="Lower"$
 
 import java.io.File
 import akka.actor._
@@ -7,7 +7,7 @@ import com.lightbend.lagom.scaladsl.api.ServiceLocator
 import com.lightbend.lagom.scaladsl.persistence.cassandra.CassandraPersistenceComponents
 import com.softwaremill.macwire._
 import com.typesafe.config.ConfigFactory
-import $organization$.$namespace$.entity._
+import $organization$.$name;format="Lower"$.entity._
 import io.surfkit.typebus.bus.TypebusApplication
 import io.surfkit.typebus.bus.kafka.{TypebusKafkaConsumer, TypebusKafkaProducer}
 import io.surfkit.typebus.event.ServiceIdentifier
