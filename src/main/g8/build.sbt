@@ -42,6 +42,7 @@ scalacOptions += "-Yrangepos"
 dockerBaseImage := "adoptopenjdk/openjdk8"
 packageName in Docker := name.value
 version in Docker := "latest"
-//dockerRepository := Some("127.0.0.1:5000/test")
+
+dockerRepository := Option(System.getProperty("dockerRepository"))
 
 
