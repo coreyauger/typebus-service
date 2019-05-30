@@ -35,6 +35,9 @@ libraryDependencies ++= Seq(
 
 val paradiseVersion = "2.1.1"
 
+enablePlugins(JavaAppPackaging)
+enablePlugins(DockerPlugin)
+
 addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
 
 scalacOptions += "-Yrangepos"
@@ -43,6 +46,6 @@ dockerBaseImage := "adoptopenjdk/openjdk8"
 packageName in Docker := name.value
 version in Docker := "latest"
 
-dockerRepository := Option(System.getProperty("dockerRepository"))
+dockerRepository in Docker := Option(System.getProperty("dockerRepository"))
 
 
