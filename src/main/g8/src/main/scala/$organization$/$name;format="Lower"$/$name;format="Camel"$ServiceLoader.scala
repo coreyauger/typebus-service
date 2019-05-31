@@ -9,6 +9,8 @@ import com.softwaremill.macwire._
 import com.typesafe.config.ConfigFactory
 import $organization$.$name;format="Lower"$.entity._
 import io.surfkit.typebus.bus.TypebusApplication
+import akka.management.cluster.bootstrap.ClusterBootstrap
+import akka.management.scaladsl.AkkaManagement
 import io.surfkit.typebus.bus.kafka.{TypebusKafkaConsumer, TypebusKafkaProducer}
 import io.surfkit.typebus.event.ServiceIdentifier
 
@@ -20,6 +22,11 @@ class $name;format="Camel"$ServiceLoader()
   implicit val system = context.system
   implicit val actorMaterializer = ActorMaterializer(ActorMaterializerSettings(system))
 
+  // https://doc.akka.io/docs/akka-management/current/bootstrap/index.html
+  // Akka Management hosts the HTTP routes used by bootstrap
+  AkkaManagement(system).start()
+  // Starting the bootstrap process needs to be done explicitly
+  ClusterBootstrap(system).start()
 
   override def serviceLocator: ServiceLocator = ???
 
