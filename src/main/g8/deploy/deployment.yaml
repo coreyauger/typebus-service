@@ -1,0 +1,88 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pod-reader
+rules:
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["pods"]
+    verbs: ["get", "watch", "list"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: read-pods
+subjects:
+  # https://doc.akka.io/docs/akka-management/current/bootstrap/kubernetes-api.html
+  # Create the default user for the 'default' namespace, update for the namespace you are running in
+  - kind: User
+    name: system:serviceaccount:default:default
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: $name;format="normalize"$
+  name: $name;format="normalize"$
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: $name;format="normalize"$
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: $name;format="normalize"$
+        actorSystemName: $name;format="normalize"$
+    spec:
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: $name;format="normalize"$
+          image: radiance.azurecr.io/$name;format="normalize"$:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: management
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: management
+          ports:
+            # akka remoting
+            - name: remoting
+              containerPort: 2552
+              protocol: TCP
+            # akka-management bootstrap
+            - containerPort: 8558
+              protocol: TCP
+              # when contact-point-discovery.port-name is set for cluster bootstrap,
+              # the management port must be named accordingly:
+              name: management
+          env:
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+          envFrom:
+            - configMapRef:
+                name: radiance-config
+          env:
+            # The Kubernetes API discovery will use this service name to look for
+            # nodes with this value in the 'app' label.
+            # This can be customized with the 'pod-label-selector' setting.
+            - name: AKKA_CLUSTER_BOOTSTRAP_SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: "metadata.labels['app']"
