@@ -13,7 +13,7 @@ import io.surfkit.typebus.module.Service
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class $name;format="Camel"$Service(serviceIdentifier: ServiceIdentifier, publisher: Publisher, sys: ActorSystem, userDb: $entity;format="Camel"$Database) extends Service(serviceIdentifier,publisher) with AvroByteStreams{
+class $name;format="Camel"$Service(serviceIdentifier: ServiceIdentifier, publisher: Publisher, sys: ActorSystem, $entity;format="lower"$Db: $entity;format="Camel"$Database) extends Service(serviceIdentifier,publisher) with AvroByteStreams{
   implicit val system = sys
 
   system.log.info("Starting service: " + serviceIdentifier.name)
@@ -21,14 +21,13 @@ class $name;format="Camel"$Service(serviceIdentifier: ServiceIdentifier, publish
   import $organization$.$name;format="Lower"$.data.Implicits._
 
   @ServiceMethod
-  def createUser(createUser: CreateUserCommand, meta: EventMeta): Future[User] = userDb.createUser(createUser)
-  registerStream(createUser _)
+  def create$entity;format="Camel"$(create$entity;format="Camel"$: Create$entity;format="Camel"$Command, meta: EventMeta): Future[$entity;format="Camel"$] = $entity;format="lower"$Db.create$entity;format="Camel"$(create$entity;format="Camel"$)
+  registerStream(create$entity;format="Camel"$ _)
     .withPartitionKey(_.id.toString)
 
   @ServiceMethod
-  def getUser(getUser: GetUserCommand, meta: EventMeta): Future[User] = userDb.getUser(getUser)
-  registerStream(getUser _)
-    //.withPartitionKey(_.user.id.toString)
+  def get$entity;format="Camel"$(get$entity;format="Camel"$: Get$entity;format="Camel"$Command, meta: EventMeta): Future[$entity;format="Camel"$] = $entity;format="lower"$Db.get$entity;format="Camel"$(get$entity;format="Camel"$)
+  registerStream(get$entity;format="Camel"$ _)
     .withRetryPolicy{
     case _ => typebus.bus.RetryPolicy(3, 1 second, RetryBackoff.Exponential)
   }

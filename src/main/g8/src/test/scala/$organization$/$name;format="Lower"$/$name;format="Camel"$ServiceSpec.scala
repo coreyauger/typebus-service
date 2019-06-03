@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
-import $organization$.$name;format="Lower"$.data.{CreateUserCommand, GetUserCommand, User, UserDatabase}
+import $organization$.$name;format="Lower"$.data._
 import io.surfkit.typebus.bus.TypebusApplication
 import io.surfkit.typebus.bus.testkit._
 import io.surfkit.typebus.client.Client
