@@ -20,7 +20,7 @@ class $entity;format="Camel"$EntitySpec extends WordSpec with Matchers with Befo
   val userId = UUID.randomUUID()
 
   val userNotFound = UUID.randomUUID()
- 
+
 
   val some$entity;format="Camel"$ = $entity;format="Camel"$(
     id = userId,
