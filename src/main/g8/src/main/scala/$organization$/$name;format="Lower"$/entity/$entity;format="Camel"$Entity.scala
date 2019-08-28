@@ -1,36 +1,95 @@
 package $organization$.$name;format="Lower"$.entity
 
 import java.time.LocalDateTime
-
-import com.lightbend.lagom.scaladsl.persistence._
+import java.util.UUID
 import $organization$.$name;format="Lower"$.data._
 import scala.concurrent.Future
 
-class $entity;format="Camel"$Entity extends PersistentEntity {
+import scala.concurrent.{ExecutionContext, Future}
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
+import akka.cluster.sharding.typed.{ClusterShardingSettings, ShardingEnvelope}
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityTypeKey}
+import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 
-  override type Command = $entity;format="Camel"$Command[_]
-  override type Event = $entity;format="Camel"$Event
-  override type State = $entity;format="Camel"$State
+object $entity;format="Camel"$Entity {
 
-  override def initialState = $entity;format="Camel"$State(None, LocalDateTime.now().toString)
+  sealed trait Command
+  // command
+  final case class EntityCreate$entity;format="Camel"$(id: UUID, create: Create$entity;format="Camel"$)(val replyTo: ActorRef[$entity;format="Camel"$Created]) extends Command
+  // query
+  final case class EntityGet$entity;format="Camel"$(get: Get$entity;format="Camel"$)(val replyTo: ActorRef[$entity;format="Camel"$]) extends Command
+  final case class EntityGetState(id: UUID)(val replyTo: ActorRef[$entity;format="Camel"$State]) extends Command
 
-  override def behavior: ($entity;format="Camel"$State) => Actions = {
-    case $entity;format="Camel"$State(_, _) => Actions()
-      .onCommand[Create$entity;format="Camel"$Command, $entity;format="Camel"$] {
-      case (Create$entity;format="Camel"$Command(x), ctx, _) ⇒
-        ctx.thenPersist($entity;format="Camel"$Created(x))(_ ⇒ ctx.reply(x))
-    }.onReadOnlyCommand[Get$entity;format="Camel"$Command, $entity;format="Camel"$] {
-      case (Get$entity;format="Camel"$Command(id), ctx, state) =>
-        ctx.reply(state.entity.getOrElse($entity;format="Camel"$(id, "not found")))
+  val entityTypeKey: EntityTypeKey[Command] =
+    EntityTypeKey[Command]("$entity;format="Camel"$Entity")
+
+  def behavior(entityId: String): Behavior[Command] =
+    EventSourcedBehavior[Command, $entity;format="Camel"$Event, $entity;format="Camel"$State](
+    persistenceId = PersistenceId(entityId),
+    emptyState =  $entity;format="Camel"$State(None),
+    commandHandler,
+    eventHandler)
+
+  private val commandHandler: ($entity;format="Camel"$State, Command) => Effect[$entity;format="Camel"$Event, $entity;format="Camel"$State] = { (state, command) =>
+    command match {
+      case x: EntityCreate$entity;format="Camel"$ =>
+        val id = x.id
+        val entity = $entity;format="Camel"$(id, x.create.data)
+        val created = $entity;format="Camel"$Created(entity)
+        Effect.persist(created).thenRun(_ => x.replyTo.tell(created))
+
+      case x: EntityGet$entity;format="Camel"$ =>
+        state.entity.map(x.replyTo.tell)
+        Effect.none
+
+      case x: EntityGetState =>
+        x.replyTo.tell(state)
+        Effect.none
+
+      case _ => Effect.unhandled
     }
-      .onEvent {
-        case ($entity;format="Camel"$Created(x), _) ⇒
-          $entity;format="Camel"$State(Some(x), LocalDateTime.now().toString)
-      }
   }
+
+  private val eventHandler: ($entity;format="Camel"$State, $entity;format="Camel"$Event) => $entity;format="Camel"$State = { (state, event) =>
+    state match {
+      case state: $entity;format="Camel"$State =>
+        event match {
+        case $entity;format="Camel"$Created(module) =>
+          $entity;format="Camel"$State(Some(module))
+        case _ => throw new IllegalStateException(s"unexpected event [\$event] in state [\$state]")
+      }
+      case _ => throw new IllegalStateException(s"unexpected event [\$event] in state [\$state]")
+    }
+  }
+
 }
 
-class $entity;format="Camel"$EntityDatabase(persistentEntityRegistry: PersistentEntityRegistry) extends $entity;format="Camel"$Database{
-  def create$entity;format="Camel"$(x: Create$entity;format="Camel"$Command): Future[$entity;format="Camel"$] = persistentEntityRegistry.refFor[$entity;format="Camel"$Entity](x.entity.id.toString).ask(x)
-  def get$entity;format="Camel"$(x: Get$entity;format="Camel"$Command): Future[$entity;format="Camel"$] = persistentEntityRegistry.refFor[$entity;format="Camel"$Entity](x.id.toString).ask(x)
+
+class $entity;format="Camel"$EntityDatabase(system: ActorSystem[_])(implicit val ex: ExecutionContext)
+  extends $entity;format="Camel"$Database with CQRSDatabase[$entity;format="Camel"$State]{
+  import akka.util.Timeout
+  import scala.concurrent.duration._
+  private implicit val askTimeout: Timeout = Timeout(5.seconds)
+
+  val TypeKey = $entity;format="Camel"$Entity.entityTypeKey
+  val sharding =  ClusterSharding(system)
+  val psEntities: ActorRef[ShardingEnvelope[$entity;format="Camel"$Entity.Command]] =
+    sharding.init(Entity(typeKey = TypeKey,
+      createBehavior = ctx => $entity;format="Camel"$Entity.behavior(ctx.entityId))
+      .withSettings(ClusterShardingSettings(system)))
+
+  def entity(id: String) =
+    sharding.entityRefFor($entity;format="Camel"$Entity.entityTypeKey, id)
+
+  override def create$entity;format="Camel"$(x: Create$entity;format="Camel"$): Future[$entity;format="Camel"$Created] = {
+    val id = UUID.randomUUID()
+    entity(id.toString) ? $entity;format="Camel"$Entity.EntityCreate$entity;format="Camel"$(id, x)
+  }
+
+  override def get$entity;format="Camel"$(x: Get$entity;format="Camel"$): Future[$entity;format="Camel"$] =
+    entity(x.id.toString) ? $entity;format="Camel"$Entity.EntityGet$entity;format="Camel"$(x)
+
+  override def getState(id: String): Future[$entity;format="Camel"$State] =
+    entity(id) ? $entity;format="Camel"$Entity.EntityGetState(UUID.fromString(id))
 }

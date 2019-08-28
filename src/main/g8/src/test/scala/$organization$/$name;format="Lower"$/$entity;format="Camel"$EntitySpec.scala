@@ -4,8 +4,6 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.testkit.TestKit
-import com.lightbend.lagom.scaladsl.testkit.PersistentEntityTestDriver
-import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.InvalidCommandException
 import $organization$.$name;format="Lower"$.data._
 import $organization$.$name;format="Lower"$.entity.$entity;format="Camel"$Entity
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
@@ -20,11 +18,9 @@ class $entity;format="Camel"$EntitySpec extends WordSpec with Matchers with Befo
   }
 
   val userId = UUID.randomUUID()
-  val driver = new PersistentEntityTestDriver(system, new $entity;format="Camel"$Entity, userId.toString)
 
   val userNotFound = UUID.randomUUID()
-  val notFoundDrive = new PersistentEntityTestDriver(system, new $entity;format="Camel"$Entity, userNotFound.toString)
-
+ 
 
   val some$entity;format="Camel"$ = $entity;format="Camel"$(
     id = userId,

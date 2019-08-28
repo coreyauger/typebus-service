@@ -1,7 +1,6 @@
 package $organization$.$name;format="Lower"$
 
 import akka.actor._
-import com.lightbend.lagom.scaladsl.persistence.PersistentEntityRegistry
 import $organization$.$name;format="Lower"$.data._
 import io.surfkit.typebus
 import io.surfkit.typebus._
@@ -21,12 +20,12 @@ class $name;format="Camel"$Service(serviceIdentifier: ServiceIdentifier, publish
   import $organization$.$name;format="Lower"$.data.Implicits._
 
   @ServiceMethod
-  def create$entity;format="Camel"$(create$entity;format="Camel"$: Create$entity;format="Camel"$Command, meta: EventMeta): Future[$entity;format="Camel"$] = $entity;format="lower"$Db.create$entity;format="Camel"$(create$entity;format="Camel"$)
+  def create$entity;format="Camel"$(create$entity;format="Camel"$: Create$entity;format="Camel"$, meta: EventMeta): Future[$entity;format="Camel"$Created] = $entity;format="lower"$Db.create$entity;format="Camel"$(create$entity;format="Camel"$)
   registerStream(create$entity;format="Camel"$ _)
-    .withPartitionKey(_.id.toString)
+    .withPartitionKey(_.entity.id.toString)
 
   @ServiceMethod
-  def get$entity;format="Camel"$(get$entity;format="Camel"$: Get$entity;format="Camel"$Command, meta: EventMeta): Future[$entity;format="Camel"$] = $entity;format="lower"$Db.get$entity;format="Camel"$(get$entity;format="Camel"$)
+  def get$entity;format="Camel"$(get$entity;format="Camel"$: Get$entity;format="Camel"$, meta: EventMeta): Future[$entity;format="Camel"$] = $entity;format="lower"$Db.get$entity;format="Camel"$(get$entity;format="Camel"$)
   registerStream(get$entity;format="Camel"$ _)
     .withRetryPolicy{
     case _ => typebus.bus.RetryPolicy(3, 1 second, RetryBackoff.Exponential)
