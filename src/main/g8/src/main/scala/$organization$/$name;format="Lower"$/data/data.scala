@@ -13,6 +13,7 @@ package object data {
 
   sealed trait $entity;format="Camel"$Event
   case class $entity;format="Camel"$Created(entity: $entity;format="Camel"$) extends $entity;format="Camel"$Event
+  case class $entity;format="Camel"$CompensatingActionPerformed(state: $entity;format="Camel"$State) extends $entity;format="Camel"$Event
   case class $entity;format="Camel"$State(entity: Option[$entity;format="Camel"$])
   case class $entity;format="Camel"$(id: UUID, data: String)
 
@@ -21,12 +22,6 @@ package object data {
     implicit val $entity;format="Camel"$CreatedRW = Typebus.declareType[$entity;format="Camel"$Created, AvroByteStreamReader[$entity;format="Camel"$Created], AvroByteStreamWriter[$entity;format="Camel"$Created]]
     implicit val $entity;format="Camel"$RW = Typebus.declareType[$entity;format="Camel"$, AvroByteStreamReader[$entity;format="Camel"$], AvroByteStreamWriter[$entity;format="Camel"$]]
     implicit val get$entity;format="Camel"$RW = Typebus.declareType[Get$entity;format="Camel"$, AvroByteStreamReader[Get$entity;format="Camel"$], AvroByteStreamWriter[Get$entity;format="Camel"$]]
-  }
-
-  trait CQRSDatabase[S]{
-    def getState(id: String): Future[S]
-    // TODO compensating action
-    //def modifyState(id: String, state: S):
   }
 
   trait $entity;format="Camel"$Database{

@@ -32,7 +32,7 @@ object $name;format="Camel"$ServiceLoader extends App{
       // only want to activate and join cluster in certain cases
       //ZookeeperClusterSeed(system).join()
       lazy val producer = new TypebusKafkaProducer(serviceIdentity, untypedSystem)
-      lazy val service = new $name;format="Camel"$Service(serviceIdentity, producer, untypedSystem, new $entity;format="Camel"$EntityDatabase(context.system))
+      lazy val service = new $name;format="Camel"$Service(serviceIdentity, producer, untypedSystem, new $entity;format="Camel"$EntityDatabase(context.system, producer))
       lazy val consumer = new TypebusKafkaConsumer(service, producer, untypedSystem)
 
       TypebusApplication

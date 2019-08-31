@@ -11,12 +11,15 @@ import akka.cluster.sharding.typed.{ClusterShardingSettings, ShardingEnvelope}
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityTypeKey}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import io.surfkit.typebus.bus.Publisher
+import io.surfkit.typebus.entity.EntityDb
 
 object $entity;format="Camel"$Entity {
 
   sealed trait Command
   // command
   final case class EntityCreate$entity;format="Camel"$(id: UUID, create: Create$entity;format="Camel"$)(val replyTo: ActorRef[$entity;format="Camel"$Created]) extends Command
+  final case class EntityModifyState(state: $entity;format="Camel"$State)(val replyTo: ActorRef[$entity;format="Camel"$CompensatingActionPerformed]) extends Command
   // query
   final case class EntityGet$entity;format="Camel"$(get: Get$entity;format="Camel"$)(val replyTo: ActorRef[$entity;format="Camel"$]) extends Command
   final case class EntityGetState(id: UUID)(val replyTo: ActorRef[$entity;format="Camel"$State]) extends Command
@@ -47,6 +50,10 @@ object $entity;format="Camel"$Entity {
         x.replyTo.tell(state)
         Effect.none
 
+      case x: EntityModifyState =>
+        val compensatingActionPerformed = $entity;format="Camel"$CompensatingActionPerformed(x.state)
+        Effect.persist(compensatingActionPerformed).thenRun(_ => x.replyTo.tell(compensatingActionPerformed))
+
       case _ => Effect.unhandled
     }
   }
@@ -57,6 +64,8 @@ object $entity;format="Camel"$Entity {
         event match {
         case $entity;format="Camel"$Created(module) =>
           $entity;format="Camel"$State(Some(module))
+        case $entity;format="Camel"$CompensatingActionPerformed(newState) =>
+          newState
         case _ => throw new IllegalStateException(s"unexpected event [\$event] in state [\$state]")
       }
       case _ => throw new IllegalStateException(s"unexpected event [\$event] in state [\$state]")
@@ -66,17 +75,18 @@ object $entity;format="Camel"$Entity {
 }
 
 
-class $entity;format="Camel"$EntityDatabase(system: ActorSystem[_])(implicit val ex: ExecutionContext)
-  extends $entity;format="Camel"$Database with CQRSDatabase[$entity;format="Camel"$State]{
+class $entity;format="Camel"$EntityDatabase(system: ActorSystem[_], val producer: Publisher)(implicit val ex: ExecutionContext)
+  extends $entity;format="Camel"$Database with EntityDb[$entity;format="Camel"$State]{
   import akka.util.Timeout
   import scala.concurrent.duration._
+  import akka.actor.typed.scaladsl.adapter._
   private implicit val askTimeout: Timeout = Timeout(5.seconds)
 
-  val TypeKey = $entity;format="Camel"$Entity.entityTypeKey
+  override def typeKey = $entity;format="Camel"$Entity.entityTypeKey
   val sharding =  ClusterSharding(system)
   val psEntities: ActorRef[ShardingEnvelope[$entity;format="Camel"$Entity.Command]] =
-    sharding.init(Entity(typeKey = TypeKey,
-      createBehavior = ctx => $entity;format="Camel"$Entity.behavior(ctx.entityId))
+    sharding.init(Entity(typeKey = typeKey,
+      createBehavior = createEntity($entity;format="Camel"$Entity.behavior)(system.toUntyped))
       .withSettings(ClusterShardingSettings(system)))
 
   def entity(id: String) =
@@ -92,4 +102,7 @@ class $entity;format="Camel"$EntityDatabase(system: ActorSystem[_])(implicit val
 
   override def getState(id: String): Future[$entity;format="Camel"$State] =
     entity(id) ? $entity;format="Camel"$Entity.EntityGetState(UUID.fromString(id))
+
+  override def modifyState(id: String, state: $entity;format="Camel"$State): Future[$entity;format="Camel"$State] =
+    (entity(id) ? $entity;format="Camel"$Entity.EntityModifyState(state)).map(_.state)
 }
