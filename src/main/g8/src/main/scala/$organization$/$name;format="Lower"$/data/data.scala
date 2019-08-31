@@ -2,6 +2,8 @@ package $organization$.$name;format="Lower"$
 
 import java.util.UUID
 import io.surfkit.typebus._
+import io.surfkit.typebus.event.DbAccessor
+import io.surfkit.typebus.entity.EntityDb
 import scala.concurrent.Future
 
 package object data {
@@ -10,6 +12,7 @@ package object data {
   sealed trait $entity;format="Camel"$Command
   case class Create$entity;format="Camel"$(data: String) extends $entity;format="Camel"$Command
   case class Get$entity;format="Camel"$(id: UUID) extends $entity;format="Camel"$Command
+  case class Get$entity;format="Camel"$EntityState(id: String) extends $entity;format="Camel"$Command with DbAccessor
 
   sealed trait $entity;format="Camel"$Event
   case class $entity;format="Camel"$Created(entity: $entity;format="Camel"$) extends $entity;format="Camel"$Event
@@ -24,7 +27,7 @@ package object data {
     implicit val get$entity;format="Camel"$RW = Typebus.declareType[Get$entity;format="Camel"$, AvroByteStreamReader[Get$entity;format="Camel"$], AvroByteStreamWriter[Get$entity;format="Camel"$]]
   }
 
-  trait $entity;format="Camel"$Database{
+  trait $entity;format="Camel"$Database extends EntityDb[$entity;format="Camel"$State]{
     def create$entity;format="Camel"$(x: Create$entity;format="Camel"$): Future[$entity;format="Camel"$Created]
     def get$entity;format="Camel"$(x: Get$entity;format="Camel"$): Future[$entity;format="Camel"$]
   }

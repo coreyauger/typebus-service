@@ -76,7 +76,7 @@ object $entity;format="Camel"$Entity {
 
 
 class $entity;format="Camel"$EntityDatabase(system: ActorSystem[_], val producer: Publisher)(implicit val ex: ExecutionContext)
-  extends $entity;format="Camel"$Database with EntityDb[$entity;format="Camel"$State]{
+  extends $entity;format="Camel"$Database{
   import akka.util.Timeout
   import scala.concurrent.duration._
   import akka.actor.typed.scaladsl.adapter._

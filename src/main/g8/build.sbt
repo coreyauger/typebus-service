@@ -14,7 +14,7 @@ lazy val `$name;format="normalize"$` =
   (project in file("."))
 
 val akkaV = "2.5.23"
-val typebusV =  "0.0.7-SNAPSHOT"
+val typebusV =  "0.0.11-SNAPSHOT"
 val phantomVersion = "2.41.0"
 val akkaManagementVersion = "1.0.1"
 
