@@ -19,6 +19,8 @@ class $name;format="Camel"$Service(serviceIdentifier: ServiceIdentifier, publish
   val bus = publisher.busActor
   import $organization$.$name;format="Lower"$.data.Implicits._
 
+  registerDataBaseStream[Get$entity;format="Camel"$EntityState, $entity;format="Camel"$State]($entity;format="lower"$Db)
+
   @ServiceMethod
   def create$entity;format="Camel"$(create$entity;format="Camel"$: Create$entity;format="Camel"$, meta: EventMeta): Future[$entity;format="Camel"$Created] = $entity;format="lower"$Db.create$entity;format="Camel"$(create$entity;format="Camel"$)
   registerStream(create$entity;format="Camel"$ _)

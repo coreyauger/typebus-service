@@ -25,6 +25,8 @@ package object data {
     implicit val $entity;format="Camel"$CreatedRW = Typebus.declareType[$entity;format="Camel"$Created, AvroByteStreamReader[$entity;format="Camel"$Created], AvroByteStreamWriter[$entity;format="Camel"$Created]]
     implicit val $entity;format="Camel"$RW = Typebus.declareType[$entity;format="Camel"$, AvroByteStreamReader[$entity;format="Camel"$], AvroByteStreamWriter[$entity;format="Camel"$]]
     implicit val get$entity;format="Camel"$RW = Typebus.declareType[Get$entity;format="Camel"$, AvroByteStreamReader[Get$entity;format="Camel"$], AvroByteStreamWriter[Get$entity;format="Camel"$]]
+    implicit val get$entity;format="Camel"$EntityStateRW = Typebus.declareType[Get$entity;format="Camel"$EntityState, AvroByteStreamReader[Get$entity;format="Camel"$EntityState], AvroByteStreamWriter[Get$entity;format="Camel"$EntityState]]
+    implicit val $entity;format="Camel"$StateRW = Typebus.declareType[$entity;format="Camel"$State, AvroByteStreamReader[$entity;format="Camel"$State], AvroByteStreamWriter[$entity;format="Camel"$State]]
   }
 
   trait $entity;format="Camel"$Database extends EntityDb[$entity;format="Camel"$State]{
